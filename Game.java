@@ -1,86 +1,46 @@
-public class Game {
-    public int attemptCount;
-    public int maxAttempts;
-    public int currentGuess;
-    public int targetGuess;
-    public String difficulty;
-    public boolean hasWon;
+import java.io.*;
 
-    public Game(String difficulty, int maxAttempts) {
-        this.difficulty = difficulty;
-        this.maxAttempts = maxAttempts;
-        this.attemptCount = 0;
-        this.currentGuess = 0;
-        this.targetGuess = setTarget();
-        System.out.println(this.targetGuess);
-        this.hasWon = false;
+public class Game implements Serializable {
+    private int mysteryNumber;
+    private int attempts;
+
+    public Game() {
+        generateMysteryNumber();
+        attempts = 0;
     }
 
-    public int getAttemptCount() {
-        return attemptCount;
+    // Generates a random number between 1 and 100
+    public void generateMysteryNumber() {
+        mysteryNumber = (int) (Math.random() * 100) + 1;
     }
 
-    public void setAttemptCount(int attemptCount) {
-        this.attemptCount = attemptCount;
-    }
-
-    public int getMaxAttempts() {
-        return maxAttempts;
-    }
-
-    public void setMaxAttempts(int maxAttempts) {
-        this.maxAttempts = maxAttempts;
-    }
-
-    public int getCurrentGuess() {
-        return currentGuess;
-    }
-
-    public void setCurrentGuess(int currentGuess) {
-        this.currentGuess = currentGuess;
-    }
-
-    public int getTargetGuess() {
-        return targetGuess;
-    }
-
-    public void setTargetGuess(int targetGuess) {
-        this.targetGuess = targetGuess;
-    }
-
-    public String getDifficulty() {
-        return difficulty;
-    }
-
-    public void setDifficulty(String difficulty) {
-        this.difficulty = difficulty;
-    }
-
-    public int setTarget(){
-        switch (this.difficulty) {
-            case "Easy":
-                return (int)(Math.random()*100);
-            case "Medium":
-                return (int)(Math.random()*1000);
-            case "Hard":
-                return (int)(Math.random()*10000);
-            case "Extreme":
-                return (int)(Math.random()*100000);
-            default:
-                throw new AssertionError();
+    // Processes the player's guess and returns a hint
+    public String makeGuess(int guess) {
+        attempts++;
+        if (guess > mysteryNumber) {
+            return "Lower";
+        } else if (guess < mysteryNumber) {
+            return "Higher";
+        } else {
+            return "Correct";
         }
     }
 
-    public void increaseAttempt() {
-        this.attemptCount++;
+    public int getAttempts() {
+        return attempts;
     }
 
-    public void saveGame() {
-        
+    // Saves the current game state to a file
+    public void saveGame(String filename) throws IOException {
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(filename))) {
+            out.writeObject(this);
+        }
     }
 
-    public void importGame() {
-
+    // Loads a saved game state from a file
+    public static Game loadGame(String filename) throws IOException, ClassNotFoundException {
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(filename))) {
+            return (Game) in.readObject();
+        }
     }
-
 }

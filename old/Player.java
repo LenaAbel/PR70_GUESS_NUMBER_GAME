@@ -1,3 +1,4 @@
+package old;
 public class Player {
     public String nickName;
     public int score;
