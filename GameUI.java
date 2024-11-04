@@ -2,7 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.*;
 
-public class GameGUI extends JFrame {
+public class GameUI extends JFrame {
     private Game game;
     private JTextField guessField;
     private JLabel messageLabel;
@@ -19,13 +19,13 @@ public class GameGUI extends JFrame {
     private File lastDirectory = null;
 
     // Default constructor starts a new game
-    public GameGUI() {
+    public GameUI() {
         game = new Game();
         initComponents();
     }
 
     // Overloaded constructor to load a game
-    public GameGUI(boolean loadGame) {
+    public GameUI(boolean loadGame) {
         if (loadGame) {
             game = new Game(); // Start with a new game in case loading fails
             initComponents();   // Initialize components before attempting to load

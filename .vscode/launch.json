@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "WelcomeScreen",
+            "request": "launch",
+            "mainClass": "WelcomeScreen",
+            "projectName": "PR70_GUESS_NUMBER_GAME_14ccfdcf"
+        },
+        {
+            "type": "java",
             "name": "NumberGuessingGame",
             "request": "launch",
             "mainClass": "NumberGuessingGame",

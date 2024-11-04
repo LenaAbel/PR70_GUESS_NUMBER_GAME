@@ -1,6 +1,5 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 
 public class WelcomeScreen extends JFrame {
     public WelcomeScreen() {
@@ -8,118 +7,102 @@ public class WelcomeScreen extends JFrame {
     }
 
     private void initComponents() {
-        
         // Set up the frame
-        setTitle("Number Guessing Game");
+        setTitle("JUSTE PRIX");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH); // Full size
         setLayout(new BorderLayout());
-        
-        // Main panel with GridBagLayout for central components
-        JPanel mainPanel = new JPanel(new GridBagLayout());
-        mainPanel.setOpaque(false);  // Make main panel transparent to show the background symbols
+
+        // Title Label - Centered at the top with extra margin
+        JLabel titleLabel = new JLabel("JUSTE PRIX", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("SansSerif", Font.BOLD, 48));
+        JPanel titlePanel = new JPanel(new BorderLayout());
+        titlePanel.add(titleLabel, BorderLayout.CENTER);
+        titlePanel.setBorder(BorderFactory.createEmptyBorder(30, 0, 30, 0)); // Add top margin
+        add(titlePanel, BorderLayout.NORTH);
+
+        // Center Panel with GridBagLayout for centered layout
+        JPanel centerPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-
-        // Title Label
-        JLabel titleLabel = new JLabel("Le Juste Prix");
-        titleLabel.setFont(new Font("SansSerif", Font.BOLD, 36));
-        titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
-
-        // Buttons
-        JButton newGameButton = new JButton("Start New Game");
-        JButton loadGameButton = new JButton("Load Game");
-        JButton exitButton = new JButton("Exit");
-
-        newGameButton.setFont(new Font("SansSerif", Font.PLAIN, 24));
-        loadGameButton.setFont(new Font("SansSerif", Font.PLAIN, 24));
-        exitButton.setFont(new Font("SansSerif", Font.PLAIN, 24));
-
-        // Set button actions
-        newGameButton.addActionListener(e -> startNewGame());
-        loadGameButton.addActionListener(e -> loadGame());
-        exitButton.addActionListener(e -> System.exit(0));
-
-        // Layout setup for mainPanel
-        gbc.insets = new Insets(20, 20, 20, 20);
         gbc.gridx = 0;
         gbc.gridy = 0;
-        gbc.anchor = GridBagConstraints.CENTER;
-        mainPanel.add(titleLabel, gbc);
+        gbc.insets = new Insets(10, 0, 10, 0);
 
-        gbc.gridy++;
-        mainPanel.add(newGameButton, gbc);
+        // Instruction Label
+        JLabel instructionLabel = new JLabel("Choisir son mode de difficulté", SwingConstants.CENTER);
+        instructionLabel.setFont(new Font("SansSerif", Font.PLAIN, 24));
+        centerPanel.add(instructionLabel, gbc);
 
-        gbc.gridy++;
-        mainPanel.add(loadGameButton, gbc);
+        // Difficulty Buttons in a FlowLayout
+        JPanel difficultyPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
+        difficultyPanel.setPreferredSize(new Dimension(900, 100)); // Adjust width as needed to fit all buttons
 
-        gbc.gridy++;
-        mainPanel.add(exitButton, gbc);
-
-        // Add mainPanel to the frame over the background panel
-        add(mainPanel, BorderLayout.CENTER);
-
-        // Load and scale the image
-        ImageIcon originalIcon = new ImageIcon("Assets/presentateur.png");
-
-        // Define the normal and hover sizes for the image
-        int normalWidth = 400;
-        int normalHeight = 400;
-        int hoverWidth = 450;
-        int hoverHeight = 450;
-
-        // Scale the image to the normal size
-        Image originalImage = originalIcon.getImage();
-        Image normalImage = originalImage.getScaledInstance(normalWidth, normalHeight, Image.SCALE_SMOOTH);
-        ImageIcon normalIcon = new ImageIcon(normalImage);
-
-        // Create a label to hold the image
-        JLabel imageLabel = new JLabel(normalIcon);
-
-        // Create a fixed-size panel for the image with padding on top
-        JPanel imagePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0)) {
-            @Override
-            public Dimension getPreferredSize() {
-                return new Dimension(hoverWidth, hoverHeight); // Set to max hover size
-            }
+        String[][] difficulties = {
+                { "Facile", "1 à 10" },
+                { "Moyen", "1 à 100" },
+                { "Difficile", "-100 à 100" },
+                { "Extreme", "Hexadecimal" }
         };
-        
-        // Add padding to move the image lower
-        imagePanel.setBorder(BorderFactory.createEmptyBorder(50, 0, 0, 0)); // Add 50px padding to the top
-        imagePanel.add(imageLabel);
-        imagePanel.setOpaque(false); 
-        add(imagePanel, BorderLayout.SOUTH);
-        
-        // Mouse listener for enlarging and shrinking the image on hover
-        imageLabel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                // Scale the image to the hover size when mouse enters
-                Image hoverImage = originalImage.getScaledInstance(hoverWidth, hoverHeight, Image.SCALE_SMOOTH);
-                imageLabel.setIcon(new ImageIcon(hoverImage));
-            }
+        for (String[] difficulty : difficulties) {
+            String mode = difficulty[0];
+            String range = difficulty[1];
+            JButton button = new JButton("<html><center>" + mode + "<br>" + range + "</center></html>");
+            button.setFont(new Font("SansSerif", Font.PLAIN, 20));
+            button.setBackground(Color.LIGHT_GRAY);
+            difficultyPanel.add(button);
+        }
+        gbc.gridy = 1;
+        centerPanel.add(difficultyPanel, gbc);
 
-            @Override
-            public void mouseExited(MouseEvent e) {
-                // Revert to normal size when mouse exits
-                imageLabel.setIcon(normalIcon);
-            }
-        });
+        // Option Buttons - Aligned Vertically with adaptive height
+        JPanel optionPanel = new JPanel();
+        optionPanel.setLayout(new BoxLayout(optionPanel, BoxLayout.Y_AXIS));
 
-        // Finalize frame setup
+        // Set consistent button width
+        Dimension buttonSize = new Dimension(250, 40); // Adjust width and height as needed
+        String[] options = { "Règles du jeu", "Charger une partie", "Quitter" };
+        for (String text : options) {
+            JButton button = new JButton(text);
+            button.setFont(new Font("SansSerif", Font.PLAIN, 22));
+            button.setBackground(Color.LIGHT_GRAY);
+            button.setAlignmentX(Component.CENTER_ALIGNMENT); // Center the button within BoxLayout
+            button.setPreferredSize(buttonSize); // Set consistent size for all buttons
+            button.setMaximumSize(buttonSize); // Ensure the button does not exceed the specified size
+            optionPanel.add(button);
+            optionPanel.add(Box.createVerticalStrut(15)); // Spacer between buttons
+        }
+
+        gbc.gridy = 2;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        centerPanel.add(optionPanel, gbc);
+
+        // Wrapper to ensure the centerPanel stays centered
+        JPanel wrapperPanel = new JPanel(new BorderLayout());
+        wrapperPanel.add(centerPanel, BorderLayout.CENTER);
+        add(wrapperPanel, BorderLayout.CENTER);
+
+        // Image Panel aligned to the bottom left within a restricted width panel
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+
+        // Adjust the image icon as needed
+        ImageIcon icon = new ImageIcon("Assets/presentateur.png"); // Adjust path as needed
+        Image image = icon.getImage().getScaledInstance(300, 300, Image.SCALE_SMOOTH);
+        JLabel imageLabel = new JLabel(new ImageIcon(image));
+
+        // Image container to limit width and align the image to the left
+        JPanel imageContainer = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        imageContainer.add(imageLabel);
+        imageContainer.setPreferredSize(new Dimension(350, 300)); // Set width to 350 or any desired width
+
+        // Add the image container to the bottom panel
+        bottomPanel.add(imageContainer, BorderLayout.WEST); // Align to the left
+
+        // Add bottomPanel to the main frame in the SOUTH position
+        add(bottomPanel, BorderLayout.SOUTH);
+
+        // Display the frame
         setVisible(true);
     }
 
-    private void startNewGame() {
-        // Close the welcome screen
-        dispose();
-        // Start a new game
-        SwingUtilities.invokeLater(() -> new GameGUI());
-    }
 
-    private void loadGame() {
-        // Close the welcome screen
-        dispose();
-        // Load an existing game
-        SwingUtilities.invokeLater(() -> new GameGUI(true)); // Pass a flag to indicate loading
-    }
 }
