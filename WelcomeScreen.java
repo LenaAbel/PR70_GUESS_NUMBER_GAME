@@ -1,9 +1,16 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
+import javax.sound.sampled.*;
 
 public class WelcomeScreen extends JFrame {
+    private Clip musicClip;
+    private boolean isMuted = false;
+    private JButton soundButton;
+    private Clip hoverSoundClip; // Clip for the hover sound
+
     public WelcomeScreen() {
         initComponents();
     }
@@ -33,15 +40,47 @@ public class WelcomeScreen extends JFrame {
         // Set the background color to white
         backgroundPanel.setBackground(backgroundColor);
 
-        // Title Label - Centered at the top with extra margin
+        // Title Panel with sound button
+        JPanel titlePanel = new JPanel(new BorderLayout());
+        titlePanel.setOpaque(false); // Make panel transparent
+
+        // Title Label
         JLabel titleLabel = new JLabel("JUSTE PRIX", SwingConstants.CENTER);
         titleLabel.setFont(titleFont); // Set the custom title font
         titleLabel.setForeground(titleColor); // Set title text color to blue
-
-        JPanel titlePanel = new JPanel(new BorderLayout());
-        titlePanel.setOpaque(false); // Make panel transparent
         titlePanel.add(titleLabel, BorderLayout.CENTER);
-        titlePanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0)); // Adjusted margins
+
+        // Sound Button
+        soundButton = new JButton("🔊");
+        soundButton.setFont(new Font("SansSerif", Font.PLAIN, 24));
+        soundButton.setBorderPainted(false);
+        soundButton.setContentAreaFilled(false);
+        soundButton.setFocusPainted(false);
+        soundButton.setOpaque(false);
+        soundButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        // Sound Button ActionListener
+        soundButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (isMuted) {
+                    // Unmute: Start the music
+                    startMusic();
+                    soundButton.setText("🔊");
+                    isMuted = false;
+                } else {
+                    // Mute: Stop the music
+                    stopMusic();
+                    soundButton.setText("🔇");
+                    isMuted = true;
+                }
+            }
+        });
+
+        // Add sound button to the title panel
+        titlePanel.add(soundButton, BorderLayout.WEST);
+
+        // Add title panel to background panel
         backgroundPanel.add(titlePanel, BorderLayout.NORTH);
 
         // Center Panel with GridBagLayout for centered layout
@@ -121,6 +160,28 @@ public class WelcomeScreen extends JFrame {
         Image image = icon.getImage().getScaledInstance(250, 250, Image.SCALE_SMOOTH);
         JLabel imageLabel = new JLabel(new ImageIcon(image));
 
+        // Add mouse listeners to the imageLabel
+        imageLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                // Play hover sound
+                playHoverSound();
+
+                // Enlarge the image
+                ImageIcon enlargedIcon = new ImageIcon(icon.getImage().getScaledInstance(300, 300, Image.SCALE_SMOOTH));
+                imageLabel.setIcon(enlargedIcon);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                // Stop hover sound if it's still playing
+                stopHoverSound();
+
+                // Restore the original image size
+                imageLabel.setIcon(new ImageIcon(image));
+            }
+        });
+
         // Image container to limit width and align the image to the left
         JPanel imageContainer = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         imageContainer.setOpaque(false); // Make panel transparent
@@ -133,8 +194,74 @@ public class WelcomeScreen extends JFrame {
         // Add bottomPanel to the main frame in the SOUTH position
         backgroundPanel.add(bottomPanel, BorderLayout.SOUTH);
 
+        // Start playing background music
+        startMusic();
+
+        // Add a window listener to stop music when closing
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                stopMusic();
+            }
+        });
+
         // Display the frame
         setVisible(true);
+    }
+
+    // Method to start background music
+    private void startMusic() {
+        try {
+            // Adjust the path to your generique.wav file
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File("Assets/generique.wav"));
+            musicClip = AudioSystem.getClip();
+            musicClip.open(audioInputStream);
+            musicClip.loop(Clip.LOOP_CONTINUOUSLY); // Loop continuously
+            musicClip.start();
+        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Method to stop background music
+    private void stopMusic() {
+        if (musicClip != null && musicClip.isRunning()) {
+            musicClip.stop();
+            musicClip.close();
+        }
+    }
+
+    // Method to play hover sound
+    private void playHoverSound() {
+        if (isMuted) return; // Do not play sound if muted
+        try {
+            // Adjust the path to your bienvenue.wav file
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File("Assets/bienvenuel7.wav"));
+            hoverSoundClip = AudioSystem.getClip();
+            hoverSoundClip.open(audioInputStream);
+    
+            // Increase volume
+            FloatControl gainControl = (FloatControl) hoverSoundClip.getControl(FloatControl.Type.MASTER_GAIN);
+            float increaseAmount = 6.0f; // Increase by 6 decibels
+            float newGain = Math.min(gainControl.getMaximum(), gainControl.getValue() + increaseAmount);
+            gainControl.setValue(newGain);
+    
+            hoverSoundClip.start();
+        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+            e.printStackTrace();
+        } catch (IllegalArgumentException e) {
+            // Handle the case when gain control is not supported
+            System.err.println("Gain control not supported for hover sound.");
+        }
+    }
+    
+
+    // Method to stop hover sound
+    private void stopHoverSound() {
+        if (hoverSoundClip != null && hoverSoundClip.isRunning()) {
+            hoverSoundClip.stop();
+            hoverSoundClip.close();
+        }
     }
 
     // Helper method to load font

@@ -92,7 +92,7 @@ public class BackgroundPanel extends JPanel {
         }
 
         // Number of symbols
-        int numberOfSymbols = 25;
+        int numberOfSymbols = 30;
 
         // Initialize cash symbols
         for (int i = 0; i < numberOfSymbols; i++) {
