@@ -1,64 +1,47 @@
 package old;
-public class Game {
-    private int attemptCount;
-    private int currentGuess;
-    private int targetGuess;
-    private String difficulty;
-    private boolean hasWon;
+import java.io.*;
 
-    public Game(String difficulty) {
-        this.difficulty = difficulty;
-        this.attemptCount = 0;
-        this.currentGuess = 0;
-        this.targetGuess = setTarget();
-        this.hasWon = false;
+public class Game implements Serializable {
+    private int mysteryNumber;
+    private int attempts;
+
+    public Game() {
+        generateMysteryNumber();
+        attempts = 0;
     }
 
-    public int getAttemptCount() {
-        return attemptCount;
+    // Generates a random number between 1 and 100
+    public void generateMysteryNumber() {
+        mysteryNumber = (int) (Math.random() * 100) + 1;
     }
 
-    public int getCurrentGuess() {
-        return currentGuess;
-    }
-
-    public int getTargetGuess() {
-        return targetGuess;
-    }
-
-    public String getDifficulty() {
-        return difficulty;
-    }
-
-    private int setTarget() {
-        switch (this.difficulty) {
-            case "Easy":
-                return (int) (Math.random() * 100) + 1;
-            case "Medium":
-                return (int) (Math.random() * 1000) + 1;
-            case "Hard":
-                return (int) (Math.random() * 10000) + 1;
-            case "Extreme":
-                return (int) (Math.random() * 100000) + 1;
-            default:
-                throw new IllegalArgumentException("Invalid difficulty level");
-        }
-    }
-
-    public String checkGuess(int guess) {
-        attemptCount++;
-        currentGuess = guess;
-        if (guess > targetGuess) {
+    // Processes the player's guess and returns a hint
+    public String makeGuess(int guess) {
+        attempts++;
+        if (guess > mysteryNumber) {
             return "Lower";
-        } else if (guess < targetGuess) {
+        } else if (guess < mysteryNumber) {
             return "Higher";
         } else {
-            hasWon = true;
             return "Correct";
         }
     }
 
-    public boolean hasWon() {
-        return hasWon;
+    public int getAttempts() {
+        return attempts;
+    }
+
+    // Saves the current game state to a file
+    public void saveGame(String filename) throws IOException {
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(filename))) {
+            out.writeObject(this);
+        }
+    }
+
+    // Loads a saved game state from a file
+    public static Game loadGame(String filename) throws IOException, ClassNotFoundException {
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(filename))) {
+            return (Game) in.readObject();
+        }
     }
 }

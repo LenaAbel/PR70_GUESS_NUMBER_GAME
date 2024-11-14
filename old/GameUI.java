@@ -1,4 +1,8 @@
+package old;
 import javax.swing.*;
+
+import WelcomeScreen;
+
 import java.awt.*;
 import java.io.*;
 

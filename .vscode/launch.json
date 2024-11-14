@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "GameGUI",
+            "request": "launch",
+            "mainClass": "old.GameGUI",
+            "projectName": "PR70_GUESS_NUMBER_GAME_14ccfdcf"
+        },
+        {
+            "type": "java",
             "name": "WelcomeScreen",
             "request": "launch",
             "mainClass": "WelcomeScreen",

@@ -4,6 +4,7 @@ import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
 import javax.sound.sampled.*;
+import java.awt.FontFormatException;
 
 public class WelcomeScreen extends JFrame {
     private Clip musicClip;
@@ -13,6 +14,16 @@ public class WelcomeScreen extends JFrame {
 
     public WelcomeScreen() {
         initComponents();
+    }
+
+    // Method to show the welcome screen
+    public void showWelcomeScreen() {
+        // Remove current content and re-initialize components
+        getContentPane().removeAll();
+        initComponents(); // Re-initialize the welcome screen components
+        revalidate();
+        repaint();
+        startMusic(); // Restart the background music
     }
 
     private void initComponents() {
@@ -115,6 +126,15 @@ public class WelcomeScreen extends JFrame {
             button.setBackground(buttonBackgroundColor); // Set button background color to blue
             button.setForeground(buttonTextColor); // Set button text color to white
             button.setPreferredSize(new Dimension(180, 80)); // Adjust button size as needed
+
+            // Add ActionListener to open GameScreen with the selected difficulty
+            button.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    openGameScreen(mode);
+                }
+            });
+
             difficultyPanel.add(button);
         }
         gbc.gridy = 1;
@@ -137,6 +157,17 @@ public class WelcomeScreen extends JFrame {
             button.setAlignmentX(Component.CENTER_ALIGNMENT); // Center the button within BoxLayout
             button.setPreferredSize(buttonSize); // Set consistent size for all buttons
             button.setMaximumSize(buttonSize); // Ensure the button does not exceed the specified size
+
+            // Add ActionListener to "Quitter" button
+            if (text.equals("Quitter")) {
+                button.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        System.exit(0); // Quit the application
+                    }
+                });
+            }
+
             optionPanel.add(button);
             optionPanel.add(Box.createVerticalStrut(10)); // Spacer between buttons
         }
@@ -209,6 +240,19 @@ public class WelcomeScreen extends JFrame {
         setVisible(true);
     }
 
+    // Method to open the GameScreen
+    private void openGameScreen(String difficulty) {
+        // Stop background music if needed
+        stopMusic();
+
+        // Remove current content and add GameScreen
+        getContentPane().removeAll();
+        GameScreen gameScreen = new GameScreen(difficulty, this); // Pass 'this' as reference
+        setContentPane(gameScreen);
+        revalidate();
+        repaint();
+    }
+
     // Method to start background music
     private void startMusic() {
         try {
@@ -236,16 +280,16 @@ public class WelcomeScreen extends JFrame {
         if (isMuted) return; // Do not play sound if muted
         try {
             // Adjust the path to your bienvenue.wav file
-            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File("Assets/bienvenuel7.wav"));
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File("Assets/bienvenue.wav"));
             hoverSoundClip = AudioSystem.getClip();
             hoverSoundClip.open(audioInputStream);
-    
+
             // Increase volume
             FloatControl gainControl = (FloatControl) hoverSoundClip.getControl(FloatControl.Type.MASTER_GAIN);
             float increaseAmount = 6.0f; // Increase by 6 decibels
             float newGain = Math.min(gainControl.getMaximum(), gainControl.getValue() + increaseAmount);
             gainControl.setValue(newGain);
-    
+
             hoverSoundClip.start();
         } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
             e.printStackTrace();
@@ -254,7 +298,6 @@ public class WelcomeScreen extends JFrame {
             System.err.println("Gain control not supported for hover sound.");
         }
     }
-    
 
     // Method to stop hover sound
     private void stopHoverSound() {
@@ -276,5 +319,11 @@ public class WelcomeScreen extends JFrame {
             e.printStackTrace();
             return new Font("SansSerif", Font.PLAIN, (int) size); // Fallback font if custom font fails
         }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            new WelcomeScreen();
+        });
     }
 }
