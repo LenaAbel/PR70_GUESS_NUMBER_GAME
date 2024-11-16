@@ -72,7 +72,7 @@ public class GameWindow extends JFrame {
             return;
         }
 
-        String result = game.checkGuess(guess);
+        String result = game.checkGuess(guess, playerUser);
         feedbackLabel.setText("Your guess is " + result + "!");
         attemptLabel.setText("Attempts: " + game.getAttemptCount());
 
