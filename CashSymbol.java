@@ -1,3 +1,4 @@
+
 import java.util.Random;
 import java.awt.Color;
 
@@ -36,8 +37,10 @@ public class CashSymbol {
         // Slower speed between -2 and 2, excluding 0 to ensure movement
         speedX = random.nextInt(5) - 2;
         speedY = random.nextInt(5) - 2;
-        if (speedX == 0) speedX = 1;
-        if (speedY == 0) speedY = 1;
+        if (speedX == 0)
+            speedX = 1;
+        if (speedY == 0)
+            speedY = 1;
 
         // Random symbol from a set
         String[] symbols = { "$", "€" };
@@ -45,11 +48,11 @@ public class CashSymbol {
 
         // Use the specified tints of blue
         Color[] colors = {
-            Color.decode("#23395d"),
-            Color.decode("#394d6d"),
-            Color.decode("#4f617d"),
-            Color.decode("#65748e"),
-            Color.decode("#7b889e")
+                Color.decode("#23395d"),
+                Color.decode("#394d6d"),
+                Color.decode("#4f617d"),
+                Color.decode("#65748e"),
+                Color.decode("#7b889e")
         };
         color = colors[random.nextInt(colors.length)];
     }

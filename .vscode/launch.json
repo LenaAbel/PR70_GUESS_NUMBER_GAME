@@ -8,6 +8,27 @@
             "type": "java",
             "name": "WelcomeScreen",
             "request": "launch",
+            "mainClass": "WORKING.WelcomeScreen",
+            "projectName": "PR70_GUESS_NUMBER_GAME_da813f83"
+        },
+        {
+            "type": "java",
+            "name": "WelcomeScreen",
+            "request": "launch",
+            "mainClass": "WelcomeScreen",
+            "projectName": "PR70_GUESS_NUMBER_GAME_da813f83"
+        },
+        {
+            "type": "java",
+            "name": "Main",
+            "request": "launch",
+            "mainClass": "Main",
+            "projectName": "PR70_GUESS_NUMBER_GAME_da813f83"
+        },
+        {
+            "type": "java",
+            "name": "WelcomeScreen",
+            "request": "launch",
             "mainClass": "WelcomeScreen",
             "projectName": "PR70_GUESS_NUMBER_GAME_13d74adf"
         },

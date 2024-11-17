@@ -5,6 +5,14 @@ import java.io.IOException;
 import javax.sound.sampled.*;
 import javax.swing.*;
 
+/**
+ * The WelcomeScreen class represents the initial screen of the "JUSTE PRIX"
+ * game.
+ * It is responsible for displaying the welcome screen, handling music and sound
+ * effects,
+ * and managing the game's user interface for starting the game, changing
+ * settings, and saving/loading data.
+ */
 public class WelcomeScreen extends JFrame {
     private Clip musicClip;
     private boolean isMuted = false;
@@ -14,10 +22,16 @@ public class WelcomeScreen extends JFrame {
     public GuessingGame gameData;
     public JLabel playerLabel;
 
+    /**
+     * Constructs a new WelcomeScreen instance and initializes the components.
+     */
     public WelcomeScreen() {
         initComponents();
     }
 
+    /**
+     * Displays the welcome screen and starts the background music.
+     */
     public void showWelcomeScreen() {
         getContentPane().removeAll();
         initComponents();
@@ -26,6 +40,11 @@ public class WelcomeScreen extends JFrame {
         startMusic();
     }
 
+    /**
+     * Initializes all components of the welcome screen including UI elements,
+     * buttons, fonts, and the background.
+     * It also sets up the event listeners for actions like button clicks.
+     */
     private void initComponents() {
         setTitle("JUSTE PRIX");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -36,6 +55,7 @@ public class WelcomeScreen extends JFrame {
         setContentPane(backgroundPanel);
 
         Font titleFont = loadFont("font/Magic_Sound.ttf", 48f);
+        Font playerFont = loadFont("font/MagicNeys.otf", 48f);
         Font instructionFont = loadFont("font/DK.otf", 24f);
         Font buttonFont = instructionFont;
 
@@ -46,6 +66,9 @@ public class WelcomeScreen extends JFrame {
 
         backgroundPanel.setBackground(backgroundColor);
 
+        gameData = new GuessingGame();
+
+        // Title Panel for "JUSTE PRIX"
         JPanel titlePanel = new JPanel(new BorderLayout());
         titlePanel.setOpaque(false);
 
@@ -80,6 +103,21 @@ public class WelcomeScreen extends JFrame {
         titlePanel.add(soundButton, BorderLayout.WEST);
         backgroundPanel.add(titlePanel, BorderLayout.NORTH);
 
+        // Create a new panel for the player info (Joueur and Score) to be positioned
+        // elsewhere
+        JPanel playerInfoPanel = new JPanel();
+        playerInfoPanel.setOpaque(false);
+        playerInfoPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+        if (playerData == null)
+            playerData = new PlayerUser("Invité", 0);
+        // Add the player label to this panel
+        playerLabel = new JLabel("Joueur: " + playerData.getNickName() + " | Score: " + playerData.getScore(),
+                SwingConstants.RIGHT);
+        playerLabel.setFont(playerFont);
+        playerLabel.setForeground(titleColor);
+        playerInfoPanel.add(playerLabel);
+        titlePanel.add(playerInfoPanel, BorderLayout.SOUTH);
+
         JPanel centerPanel = new JPanel(new GridBagLayout());
         centerPanel.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
@@ -113,6 +151,7 @@ public class WelcomeScreen extends JFrame {
             button.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
+                    // gameData.setDifficulty(mode);
                     openGameScreen(mode);
                 }
             });
@@ -127,7 +166,7 @@ public class WelcomeScreen extends JFrame {
         optionPanel.setLayout(new BoxLayout(optionPanel, BoxLayout.Y_AXIS));
 
         Dimension buttonSize = new Dimension(250, 50);
-        String[] options = { "Règles du jeu", "Charger une partie", "Quitter" };
+        String[] options = { "Règles du jeu", "Changer de Pseudo", "Sauvegarder", "Charger une partie", "Quitter" };
 
         for (String text : options) {
             JButton button = new JButton(text);
@@ -146,20 +185,43 @@ public class WelcomeScreen extends JFrame {
                     }
                 });
             }
+            if (text.equals("Changer de Pseudo")) {
+                button.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        String newNickname = JOptionPane.showInputDialog(
+                                WelcomeScreen.this,
+                                "Entrez un nouveau pseudo:",
+                                "Changer de Pseudo",
+                                JOptionPane.PLAIN_MESSAGE);
+                        if (newNickname != null && !newNickname.trim().isEmpty()) {
+                            playerData.setNickName(newNickname.trim());
+                            playerLabel.setFont(playerFont);
+                            playerLabel.setText(
+                                    "Joueur: " + playerData.getNickName() + " | Score: " + playerData.getScore());
+                        }
+                    }
+                });
+            }
             if (text.equals("Charger une partie")) {
                 button.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         JFileChooser fileChooser = new JFileChooser();
                         fileChooser.setDialogTitle("Select Saved Game File");
-
+                        fileChooser.setCurrentDirectory(new File("./"));
                         int userSelection = fileChooser.showOpenDialog(WelcomeScreen.this);
                         if (userSelection == JFileChooser.APPROVE_OPTION) {
                             File selectedFile = fileChooser.getSelectedFile();
 
                             try {
                                 gameData = GuessingGame.loadGame(playerData, selectedFile.getAbsolutePath());
-                                openGameScreen(gameData.getDifficulty());
+                                if (!gameData.getDifficulty().equals("none")) {
+                                    openGameScreen(gameData.getDifficulty());
+                                }
+                                playerLabel.setFont(playerFont);
+                                playerLabel.setText(
+                                        "Joueur: " + playerData.getNickName() + " | Score: " + playerData.getScore());
                             } catch (IOException e1) {
                                 e1.printStackTrace();
                             } catch (ClassNotFoundException e1) {
@@ -169,7 +231,18 @@ public class WelcomeScreen extends JFrame {
                     }
                 });
             }
-
+            if (text.equals("Sauvegarder")) {
+                button.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        try {
+                            gameData.saveGame(playerData, "player.txt");
+                        } catch (IOException e1) {
+                            e1.printStackTrace();
+                        }
+                    }
+                });
+            }
             optionPanel.add(button);
             optionPanel.add(Box.createVerticalStrut(10));
         }
@@ -221,15 +294,16 @@ public class WelcomeScreen extends JFrame {
                 stopMusic();
             }
         });
-        if (playerData == null)
-            playerData = new PlayerUser("Invité", 0);
-        playerLabel = new JLabel("Joueur: " + playerData.getNickName() + " | Score: " + playerData.getScore(), SwingConstants.RIGHT);
-        playerLabel.setFont(instructionFont);
-        playerLabel.setForeground(titleColor);
-        titlePanel.add(playerLabel, BorderLayout.EAST);
+
         setVisible(true);
     }
 
+    /**
+     * Opens the game screen with the selected difficulty level.
+     * It stops the welcome screen music and transitions to the game screen.
+     *
+     * @param difficulty The difficulty level for the game.
+     */
     private void openGameScreen(String difficulty) {
         stopMusic();
         getContentPane().removeAll();
@@ -239,18 +313,25 @@ public class WelcomeScreen extends JFrame {
         repaint();
     }
 
+    /**
+     * Starts the background music for the welcome screen.
+     * If music is already playing, it does nothing.
+     */
     private void startMusic() {
         try {
             AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File("Assets/generique.wav"));
             musicClip = AudioSystem.getClip();
-            musicClip.open(audioInputStream);
-            musicClip.loop(Clip.LOOP_CONTINUOUSLY);
-            musicClip.start();
+            // musicClip.open(audioInputStream);
+            // musicClip.loop(Clip.LOOP_CONTINUOUSLY);
+            // musicClip.start();
         } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * Stops the background music if it's currently playing.
+     */
     private void stopMusic() {
         if (musicClip != null && musicClip.isRunning()) {
             musicClip.stop();
@@ -258,8 +339,13 @@ public class WelcomeScreen extends JFrame {
         }
     }
 
+    /**
+     * Plays the hover sound effect when the user hovers over specific UI elements.
+     * The sound will only play if the music is not muted.
+     */
     private void playHoverSound() {
-        if (isMuted) return;
+        if (isMuted)
+            return;
         try {
             AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File("Assets/bienvenue.wav"));
             hoverSoundClip = AudioSystem.getClip();
@@ -278,6 +364,9 @@ public class WelcomeScreen extends JFrame {
         }
     }
 
+    /**
+     * Stops the hover sound effect if it's currently playing.
+     */
     private void stopHoverSound() {
         if (hoverSoundClip != null && hoverSoundClip.isRunning()) {
             hoverSoundClip.stop();
@@ -285,6 +374,13 @@ public class WelcomeScreen extends JFrame {
         }
     }
 
+    /**
+     * Loads a custom font from a specified file path.
+     *
+     * @param fontPath The file path to the font.
+     * @param size     The desired font size.
+     * @return A Font object representing the loaded font.
+     */
     private Font loadFont(String fontPath, float size) {
         try {
             Font font = Font.createFont(Font.TRUETYPE_FONT, new File(fontPath));
@@ -297,16 +393,29 @@ public class WelcomeScreen extends JFrame {
         }
     }
 
+    /**
+     * Main method to run the application. It initializes the WelcomeScreen class.
+     */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             new WelcomeScreen();
         });
     }
 
+    /**
+     * Sets the player data for the current session.
+     *
+     * @param playerData The player data to set.
+     */
     public void setPlayerData(PlayerUser playerData) {
         this.playerData = playerData;
     }
 
+    /**
+     * Gets the current player data.
+     *
+     * @return The current player data.
+     */
     public PlayerUser getPlayer() {
         return playerData;
     }
